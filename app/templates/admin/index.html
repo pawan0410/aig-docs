@@ -1,0 +1,242 @@
+{% extends 'admin/base.html' %}
+
+{% block content %}
+
+<a href="/admin" class="btn btn-sm btn-primary"><span class="glyphicon glyphicon-home"></span>&nbsp;&nbsp;Home</a>
+
+<div class="row">
+    <div class="col-sm-12 clearfix">
+        <a href="/admin/upload/{{parent_id}}" class="btn btn-sm btn-primary  pull-right">
+            <span class="glyphicon glyphicon-plus"></span>&nbsp;Upload new</a>
+    </div>
+</div>
+
+
+<div class="table-responsive">
+    <table class="table table-hover">
+        <caption>Policies</caption>
+        <colgroup>
+            <col width="2%">
+            <col width="10%">
+            <col width="40%">
+            <col width="5%">
+            <col width="10%">
+        </colgroup>
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Title</th>
+            <th>File</th>
+            <th>Size</th>
+            <th>Modified</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for row in rows %}
+        <tr>
+            <td>{{loop.index}}</td>
+            <td>
+                <a href="/admin/{{row.id}}">{{row.title}}</a>
+            </td>
+            <td class="clearfix">{{row.file_name}}
+                <div class="pull-right">
+                    <span class="glyphicon glyphicon-pencil"
+                     data-tooltip="tooltip"
+                          data-placement="bottom"
+                          title="Update/Change file"
+                          data-toggle="modal"
+                          data-target="#updateFileModal"
+                          data-fileid="{{row.id}}"
+                          data-title="{{row.title}}"></span>&nbsp;&nbsp;
+                    &nbsp;&nbsp;
+                            <span class="glyphicon glyphicon-cog"
+                                  data-toggle="modal"
+                                  data-target="#permissionModal" data-fileid="{{row.id}}"
+                                  data-tooltip="tooltip"
+                                  data-placement="bottom" title="File permissions"></span>&nbsp;&nbsp;
+                    &nbsp;&nbsp;
+                    {% if row.active == 1 %}
+                    <span class="glyphicon glyphicon-ok text text-success" data-fileid="{{row.id}}"></span>&nbsp;&nbsp;
+                    &nbsp;&nbsp;
+                    {% else %}
+                    <span class="glyphicon glyphicon-off text text-danger" data-fileid="{{row.id}}"></span>&nbsp;&nbsp;
+                    &nbsp;&nbsp;
+                    {% endif %}
+
+                </div>
+            </td>
+            <td>{{row.file_size}} Kb</td>
+            <td>{{row.updated_on.strftime('%b-%d %H:%M %p')}}</td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="5" align="middle">
+                <em class="text text-danger">No files here..</em>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="permissionModal" tabindex="-1" role="dialog" aria-labelledby="permissionModalLabel">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="permissionModalLabel">Permissions</h4>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" name="fileid">
+                <div>
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs" role="tablist">
+                        {% for d in departments %}
+                            <li role="presentation" {% if loop.index == 1%} class="active" {% endif %}>
+                                <a href="#{{d.id}}" aria-controls="{{d.id}}" role="tab"
+                                                                  data-toggle="tab">{{d.name}}</a>
+                            </li>
+                        {% endfor %}
+
+                    </ul>
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                       {% for d in departments %}
+                            <div role="tabpanel"
+                                 class="tab-pane {% if loop.index == 1%} active {% endif %}"
+                                 id="{{d.id}}">
+                                <br>
+                                 <ul class="list-group">
+                                      {% for u in users[d.id] %}
+                                        <li class="list-group-item">
+                                            <input type="checkbox"
+                                                   class="permission_users" value="{{u.user_id}}">&nbsp;&nbsp;{{u.name}}</li>
+                                      {% endfor %}
+                                 </ul>
+                            </div>
+                       {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="permissionModalBtn">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="updateFileModal" tabindex="-1" role="dialog" aria-labelledby="updateFileModalLabel">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="updateFileModalLabel">Update document</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal" name="changeFileFrm"
+                      enctype="multipart/form-data" method="post" action="/admin/change_file">
+                    <input type="hidden" name="fileid">
+                    <div class="form-group">
+                        <label class="control-label col-sm-2">Title </label>
+                        <div class="col-sm-10">
+                            <input type="text" name="title" class="form-control">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-2">File </label>
+                        <div class="col-sm-10">
+                            <input type="file" name="file" class="form-control">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="updateFileModalBtn">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        $(document).ready(function(e){
+            $('[data-tooltip="tooltip"]').tooltip();
+            var permissions = {{permissions|tojson|safe}};
+
+            $('#permissionModal').on('show.bs.modal', function (e) {
+                $('[name=fileid]').val(e.relatedTarget.dataset.fileid);
+                file_permissions = permissions[e.relatedTarget.dataset.fileid];
+                if( typeof(file_permissions) !== 'undefined'){
+                     $('.permission_users').each(function(){
+                         if( file_permissions.indexOf( parseInt($(this).val()) ) < 0 ){
+                             $(this).prop('checked', false);
+                         }else{
+                            $(this).prop('checked', true);
+                         }
+                     });
+                }else{
+                    $('.permission_users').each(function(){
+                         $(this).prop('checked', false);
+                    });
+                }
+            });
+
+            $('#permissionModalBtn').click(function(e){
+                 user_ids = $('.permission_users:checked').map(function(){ return this.value }).get();
+                 fileid = $('[name=fileid]').val();
+                 var elm = $(this);
+                 elm.text('Please wait.....');
+                 $.ajax({
+                    url: '/admin/user_permissions',
+                    type: 'POST',
+                    data: {user_ids: user_ids, fileid: fileid}
+                 }).done(function(response){
+
+                 }).always(function(){
+                    elm.text('Save changes');
+                 });
+            });
+
+            $('span.glyphicon.glyphicon-off').click(function(e){
+                 fileid = $(this).data('fileid');
+                 $.ajax({
+                    url: '/admin/publish_file',
+                    type: 'POST',
+                    data: {fileid: fileid, status: 1}
+                 }).done(function(response){
+                        window.location.reload();
+                 });
+            });
+
+            $('span.glyphicon.glyphicon-ok').click(function(e){
+                 fileid = $(this).data('fileid');
+                 $.ajax({
+                    url: '/admin/publish_file',
+                    type: 'POST',
+                    data: {fileid: fileid, status: 0}
+                 }).done(function(response){
+                        window.location.reload();
+                 });
+            });
+
+            $('#updateFileModal').on('show.bs.modal', function (e) {
+                $('[name=fileid]').val(e.relatedTarget.dataset.fileid);
+                $('[name=title]').val(e.relatedTarget.dataset.title);
+            });
+
+            $('#updateFileModalBtn').click(function(e){
+                 $('[name=changeFileFrm]').submit();
+            });
+
+        });
+    </script>
+{% endblock %}

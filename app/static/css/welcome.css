@@ -1,0 +1,7 @@
+body{
+	background: url('../images/bg.jpg') no-repeat top left;
+	background-size: cover;
+}
+.panel-margin-top{
+	margin-top: 60px;
+}

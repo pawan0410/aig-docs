@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AIG Business Policies </title>
+    <link rel="icon" href="/static/images/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="/static/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/theme.min.css">
+    <script src="/static/jquery/dist/jquery.min.js"></script>
+    <script src="/static/bootstrap/dist/js/bootstrap.min.js"></script>
+    <style>
+		@media (min-width: 768px){
+			.navbar {
+				border-radius: 0px;
+			}
+		}
+		.breadcrumb>li+li:before{
+			content: "\25BA";
+		}
+		.page-header{
+		    margin: -24px 0 20px;
+		}
+		@media (min-width: 1200px){
+		    .col-lg-3 {
+                width: 20%;
+            }
+		}
+		ul li{
+		    list-style-type: none;
+		}
+
+		span.glyphicon.glyphicon-resize-full, span.glyphicon.glyphicon-resize-small{
+		    cursor: pointer;
+		}
+
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-inverse">
+    <div class="container">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header clearfix">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                    data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/main">
+                AIG BUSINESS &longrightarrow; {{user_department_name}}</a>
+        </div>
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse clearfix" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav navbar-right clearfix">
+                {% if current_user.is_admin %}
+                    <li><a href="/admin">Visit admin panel</a></li>
+                {% endif %}
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+                       aria-expanded="false">
+                        <span class="glyphicon glyphicon-user"></span>&nbsp;
+                        {{current_user.name}}<span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="/main/settings">Settings</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="/logout">Logout</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div><!-- /.navbar-collapse -->
+    </div><!-- /.container-fluid -->
+</nav>
+
+<div class="container-fluid">
+
+    <div class="row">
+        <div class="col-sm-offset-1 col-lg-11">
+            <div>
+                <!-- Nav tabs -->
+                <ul class="nav nav-tabs" role="tablist">
+                    {% for d in departments %}
+                    <li role="presentation" {% if loop.index== 1%} class="active" {% endif %}>
+                        <a href="#{{d.id}}" aria-controls="{{d.id}}" role="tab"
+                           data-toggle="tab">{{d.name}}</a>
+                    </li>
+                    {% endfor %}
+
+                </ul>
+                <!-- Tab panes -->
+                <div class="tab-content">
+                    {% for d in departments %}
+                    <div role="tabpanel"
+                         class="tab-pane {% if loop.index == 1%} active {% endif %}"
+                         id="{{d.id}}">
+                        <br>
+
+                        <div class="col-lg-3 sidebar">
+                            <ul class="nav nav-pills nav-stacked">
+                                <li role="presentation" class="active">
+                                    <a href="/main">
+                                        <span class="glyphicon glyphicon-folder-open"></span>&nbsp;&nbsp;All files</a>
+                                </li>
+                                {% for row in files_by_department[d.id] %}
+                                <li role="presentation">
+                                    <a href="#" data-id="{{row.id}}" data-title="{{row.title}}"
+                                       class="menu_links" data-nav="{{row.title}}" data-department="{{d.id}}">
+                                        <span class="glyphicon glyphicon-file"></span> &nbsp;{{row.title}}</a>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <div class="col-lg-9 mainbar" id="tab_{{d.id}}">
+                            {% block content %}
+                            {% endblock %}
+                        </div>
+
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+ function loadMenu(parent_id, instance){
+     $('.tools').hide();
+     // give unique name to content div..
+     var department_id = instance.data('department');
+     $('#tab_'+department_id + ' #the_content').html('&nbsp;&nbsp;Loading.... &nbsp; <img src="/static/images/arrow-loader.gif">');
+
+     $.ajax({
+        url: '/main/menu/'+parent_id,
+     }).done(function(response){
+            menu = '<ul class="submenu">';
+            $.each(response.results, function(i, row){
+                nav = instance.data('nav')+' &raquo; '+row.title;
+                menu += '<li role="presentation">\
+                <a href="#" class="menu_links" data-id="'+row.id+'" data-title="'+row.title+'"\
+                data-nav="'+nav+'">\
+                <span class="glyphicon glyphicon-file"></span> &nbsp;'+row.title+'</a>\
+                </li>';
+            });
+            menu += '</ul>';
+            instance.parent().find('.submenu').empty();
+            instance.parent().append(menu);
+            $('#tab_'+department_id+' .breadcrumb').find('.blinks').remove();
+            link_class=instance.data('title').replace(' ', '');
+            if( $('#tab_'+department_id+' .breadcrumb').find('.'+link_class).length == 0 ){
+                $('#tab_'+department_id+' .breadcrumb').append('<li class="'+link_class+' blinks">'+instance.data('nav')+'</li>');
+            }
+
+            $('#tab_'+department_id + ' #the_content').html(response.content);
+
+            $('span.glyphicon.glyphicon-eye-open').attr('data-link', response.file_url);
+            $('.tools').show();
+
+     }).fail(function(xhr){
+            $('#tab_'+department_id + ' #the_content').html(xhr.responseText);
+     });
+ }
+
+ $('body').on('click', '.menu_links', function(e){
+    e.preventDefault();
+    var id = $(this).data('id');
+    loadMenu(id, $(this));
+ });
+
+ $('body').on('click', 'span.glyphicon.glyphicon-resize-full', function(e){
+        $(this).removeClass('glyphicon-resize-full').addClass('glyphicon-resize-small');
+        $('.sidebar').hide();
+        $('.mainbar').removeClass('col-lg-9').addClass('col-lg-12');
+ });
+
+ $('body').on('click', 'span.glyphicon.glyphicon-resize-small', function(e){
+        $(this).removeClass('glyphicon-resize-small').addClass('glyphicon-resize-full');
+        $('.sidebar').show();
+        $('.mainbar').removeClass('col-lg-12').addClass('col-lg-9');
+ });
+
+ $('#viewfileModal').on('show.bs.modal', function (e) {
+  		var link = e.relatedTarget.dataset.link;
+		var title = $.trim(e.relatedTarget.innerHTML);
+		$('#viewfileModalLabel').text(title);
+
+        var view_link = 'http://docs.google.com/gview?url='+link+'&embedded=true';
+        $(this).find('.modal-body iframe').attr('src', view_link);
+ });
+
+
+</script>
+</html>

@@ -1,0 +1,24 @@
+{% extends 'default/base.html' %}
+
+{% block content %}
+
+
+<div class="panel panel-margin-top panel-primary">
+    <div class="panel-heading">
+        <h1 class="panel-title">Hello, {{current_user.name}}</h1>
+    </div>
+    <div class="panel-body">
+        <div class="well">
+            <h4 class="text text-success">You have successfully logged in..</h4>
+        </div>
+    </div>
+    <div class="panel-footer">
+        &nbsp;&nbsp;
+        &nbsp;&nbsp;
+        &nbsp;&nbsp;
+        <a class="btn btn-primary"
+           href="/main">Visit website</a> &nbsp;&nbsp;
+        <a class="btn btn-info" href="/admin">Visit admin panel</a>
+    </div>
+</div>
+{% endblock %}
