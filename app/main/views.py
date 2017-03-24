@@ -79,7 +79,7 @@ def menu(parent_id=0):
 
     file_permission = permissions[parent_id]
 
-    if current_user.id not in file_permission:
+    if file_permission and current_user.id not in file_permission:
         raise Forbidden()
 
     rows = Files.query.filter(Files.parent_id == parent_id, Files.active == 1).all()
