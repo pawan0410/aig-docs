@@ -35,7 +35,7 @@ class ProductionConfig(Config):
     Production configurations
     """
 
-    DEBUG = False
+    DEBUG = True
     SQLALCHEMY_DATABASE_URI = 'mysql://root:maria@aig2016@127.0.0.1/aig_docs'
 
 
