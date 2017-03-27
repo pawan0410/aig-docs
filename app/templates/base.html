@@ -27,6 +27,11 @@
                 width: 20%;
             }
 		}
+		@media (min-width: 768px){
+		    .col-sm-offset-1 {
+                margin-left: 1.333333%;
+            }
+		}
 		ul li{
 		    list-style-type: none;
 		}
@@ -34,7 +39,19 @@
 		span.glyphicon.glyphicon-resize-full, span.glyphicon.glyphicon-resize-small{
 		    cursor: pointer;
 		}
+		.nav-tabs > li{
+		    padding: 0px 30px;
+		}
+		.navbar-inverse {
+            background-color: #f9f9f9;
+        }
 
+        .navbar-inverse .navbar-nav>li>a {
+            color: #5f5f5f;
+        }
+        .navbar-inverse .navbar-nav>li>a:hover {
+            color: #81c7fd;
+        }
     </style>
 </head>
 <body>
@@ -50,7 +67,8 @@
                 <span class="icon-bar"></span>
             </button>
             <a class="navbar-brand" href="/main">
-                AIG BUSINESS &longrightarrow; {{user_department_name}}</a>
+                <img src="/static/images/logo.png" width="160" height="56" align="top" style="margin-top:-16px;">
+            </a>
         </div>
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse clearfix" id="bs-example-navbar-collapse-1">
@@ -62,7 +80,7 @@
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
                        aria-expanded="false">
                         <span class="glyphicon glyphicon-user"></span>&nbsp;
-                        {{current_user.name}}<span class="caret"></span></a>
+                        {{current_user.name}} ( {{user_department_name}} )<span class="caret"></span></a>
                     <ul class="dropdown-menu">
                         <li><a href="/main/settings">Settings</a></li>
                         <li role="separator" class="divider"></li>
@@ -77,7 +95,7 @@
 <div class="container-fluid">
 
     <div class="row">
-        <div class="col-sm-offset-1 col-lg-11">
+        <div class="col-sm-offset-1 col-lg-12">
             <div>
                 <!-- Nav tabs -->
                 <ul class="nav nav-tabs" role="tablist">
@@ -124,14 +142,59 @@
         </div>
     </div>
 </div>
+
+	<!-- View file Modal -->
+<div class="modal fade" id="viewfileModal" tabindex="-1" role="dialog" aria-labelledby="viewfileModalLabel">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="viewfileModalLabel"></h4>
+      </div>
+      <div class="modal-body">
+            <iframe src="" style="width: 100%; height: 100%; border:0px;"></iframe>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+	<!-- View file Modal -->
+<div class="modal fade" id="feedbackModal" tabindex="-1" role="dialog" aria-labelledby="feedbackModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="feedbackModalLabel">Feedback</h4>
+      </div>
+      <div class="modal-body">
+            <form class="form-horizontal" method="post" name="feedbackFrm" action="/main/feedback">
+                <div class="form-group">
+                    <label class="control-label col-sm-2">Message</label>
+                    <div class="col-sm-10">
+                        <textarea class="form-control" name="message"></textarea>
+                    </div>
+                </div>
+            </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary">Send</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 </body>
 <script>
  function loadMenu(parent_id, instance){
      $('.tools').hide();
-     // give unique name to content div..
      var department_id = instance.data('department');
      $('#tab_'+department_id + ' #the_content').html('&nbsp;&nbsp;Loading.... &nbsp; <img src="/static/images/arrow-loader.gif">');
-
      $.ajax({
         url: '/main/menu/'+parent_id,
      }).done(function(response){
@@ -140,7 +203,7 @@
                 nav = instance.data('nav')+' &raquo; '+row.title;
                 menu += '<li role="presentation">\
                 <a href="#" class="menu_links" data-id="'+row.id+'" data-title="'+row.title+'"\
-                data-nav="'+nav+'">\
+                data-nav="'+nav+'" data-department="'+department_id+'">\
                 <span class="glyphicon glyphicon-file"></span> &nbsp;'+row.title+'</a>\
                 </li>';
             });
@@ -155,9 +218,9 @@
 
             $('#tab_'+department_id + ' #the_content').html(response.content);
 
-            $('span.glyphicon.glyphicon-eye-open').attr('data-link', response.file_url);
+            $('#tab_'+department_id + ' span.glyphicon.glyphicon-eye-open').attr('data-link', response.file_url);
+            $('#tab_'+department_id + ' span.glyphicon.glyphicon-comment').attr('data-fileid', parent_id);
             $('.tools').show();
-
      }).fail(function(xhr){
             $('#tab_'+department_id + ' #the_content').html(xhr.responseText);
      });
@@ -188,6 +251,29 @@
 
         var view_link = 'http://docs.google.com/gview?url='+link+'&embedded=true';
         $(this).find('.modal-body iframe').attr('src', view_link);
+ });
+
+ $('#feedbackModal').on('show.bs.modal', function (e) {
+  		var fileid = e.relatedTarget.dataset.fileid;
+		var title = $.trim($('a.menu_links[data-id='+fileid+']').text());
+		$('#feedbackModalLabel').text('Send Feedback for '+title);
+
+		$('#feedbackModal').find('button[type=submit]').click(function(e){
+		         var btn  = $(this);
+		         $.ajax({
+		            url: '/main/feedback',
+		            type: 'POST',
+		            data: {fileid: fileid, message: $('#feedbackModal').find('textarea[name=message]').val() }
+		         }).done(function(response){
+		            //
+		         });
+		});
+ });
+
+ $('#the_content h1.lead').text('Welcome to '+$('ul.nav.nav-tabs li.active a[data-toggle=tab]').text()+' policies.');
+
+ $('ul.nav.nav-tabs li a[data-toggle=tab]').click(function(e){
+     $('#the_content h1.lead').text('Welcome to '+$(this).text()+' policies.');
  });
 
 
