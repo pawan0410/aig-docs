@@ -22,6 +22,7 @@ class Config:
     FTP_SERVER = 'aigbusiness.in'
     FTP_USER = 'policies@aigbusiness.in'
     FTP_PASSWORD = 'policy123'
+    SERVER_NAME = 'policies.aigbusiness.com'
 
 
 class DevelopmentConfig(Config):
