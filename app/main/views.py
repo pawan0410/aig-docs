@@ -18,6 +18,7 @@ from flask import request
 from flask_login import login_required
 from flask_login import current_user
 from flask_mail import Message
+from flask import current_app
 
 from app.extensions import db
 from app.models.files import Files
@@ -49,6 +50,8 @@ def index():
 
     user_department = UserDepartment.query. \
         filter(UserDepartment.user_id == current_user.id).first()
+
+    current_app.logger.info("Current User ID %d" % current_user.id)
 
     user_department_name = departments_dict[user_department.department_id]
 
