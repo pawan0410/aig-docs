@@ -22,7 +22,9 @@ class Config:
     FTP_SERVER = 'aigbusiness.in'
     FTP_USER = 'policies@aigbusiness.in'
     FTP_PASSWORD = 'policy123'
-    SERVER_NAME = 'policies.aigbusiness.com'
+    SERVER_NAME = '182.74.64.202:5050'
+    SESSION_COOKIE_NAME = '182.74.64.202:5050'
+    SESSION_COOKIE_DOMAIN = '182.74.64.202:5050'
 
 
 class DevelopmentConfig(Config):
