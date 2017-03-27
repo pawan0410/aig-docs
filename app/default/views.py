@@ -13,6 +13,7 @@ from flask import url_for
 from flask import redirect
 from flask_login import login_user
 from flask_login import logout_user
+from flask_login import current_user
 from flask_mail import Message
 
 from app.extensions import login_manager
@@ -60,6 +61,10 @@ def index():
 
 @default_module.route('logout')
 def logout():
+    user = current_user
+    user.authenticated = False
+    db.session.add(user)
+    db.session.commit()
     logout_user()
     return redirect(url_for('default.views.index'))
 
