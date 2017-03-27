@@ -24,7 +24,7 @@ class Config:
     FTP_PASSWORD = 'policy123'
     SERVER_NAME = '182.74.64.202:5050'
     SESSION_COOKIE_NAME = '182.74.64.202:5050'
-    SESSION_COOKIE_DOMAIN = '182.74.64.202:5050'
+    SESSION_COOKIE_DOMAIN = 'policies.aigbusiness.com'
 
 
 class DevelopmentConfig(Config):
