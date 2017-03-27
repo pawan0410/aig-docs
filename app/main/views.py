@@ -4,6 +4,8 @@ Main module
 
 import os
 import hashlib
+import smtplib
+import datetime
 from collections import defaultdict
 
 import mammoth
@@ -15,6 +17,7 @@ from flask import jsonify
 from flask import request
 from flask_login import login_required
 from flask_login import current_user
+from flask_mail import Message
 
 from app.extensions import db
 from app.models.files import Files
@@ -23,6 +26,7 @@ from app.models.departments import Department
 from app.models.user import UserDepartment
 from app.models.user import User
 from werkzeug.exceptions import Forbidden
+from app.extensions import mail
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -79,8 +83,14 @@ def menu(parent_id=0):
 
     file_permission = permissions[parent_id]
 
-    if file_permission and current_user.id not in file_permission:
-        raise Forbidden()
+    user_department = UserDepartment.query.\
+        join(Department, UserDepartment.department_id == Department.id).\
+        add_columns(Department.name).\
+        filter(UserDepartment.user_id == current_user.id).\
+        first()
+
+    if (user_department.name.lower() != 'management') and (file_permission and current_user.id not in file_permission):
+            raise Forbidden()
 
     rows = Files.query.filter(Files.parent_id == parent_id, Files.active == 1).all()
 
@@ -92,7 +102,7 @@ def menu(parent_id=0):
                                  file_content.department_id,
                                  file_content.parent_id, file_content.file_name)
 
-    file_url = 'http://%s/static/uploads/%s/%s/%s' % (request.host,
+    file_url = 'http://policies.aigbusiness.in/%s/%s/%s' % (
                                                       file_content.department_id,
                                                       file_content.parent_id, file_content.file_name)
 
@@ -142,3 +152,35 @@ def settings():
         user_department_name=user_department_name,
         message=message
     )
+
+
+@main_module.route('/feedback', methods=['POST'])
+def feedback():
+    file_id = request.form.get('fileid', type=int)
+    message = request.form['message']
+
+    f = Files.query.get(file_id)
+
+    user = User.query.filter(User.id == f.updated_by).first()
+
+    email = Message('Document feedback', sender=current_user.email, recipients=[
+        user.email
+    ])
+    email.html = render_template(
+        'main/feedback_email.html',
+        name=user.name,
+        sender_name=current_user.name,
+        message=message,
+        file=f.title,
+        time=datetime.datetime.today().strftime('%d %b %H:%M %p').lower()
+    )
+
+    try:
+        mail.send(email)
+        return 'success'
+    except smtplib.SMTPException as e:
+        print(e)
+        return 'error'
+
+    return ''
+

@@ -4,6 +4,7 @@ Admin module
 import os
 import sqlalchemy
 from collections import defaultdict
+import ftplib
 
 from app.urls import admin_module
 from flask import render_template
@@ -11,6 +12,7 @@ from flask import request
 from flask_login import current_user
 from flask_login import login_required
 from flask import redirect
+from flask import current_app
 
 from app.models.user import UserDepartment
 from app.models.files import Files
@@ -116,6 +118,26 @@ def upload(parent_id=0):
             )
             file_size = os.path.getsize(os.path.join(upload_path, filename)) // 1024
 
+            ftp_path = r'{0}/{1}'.format(
+                user_department.department_id, parent_id
+            )
+
+            with ftplib.FTP(current_app.config['FTP_SERVER']) as ftp:
+                try:
+                    ftp.login(user=current_app.config['FTP_USER'], passwd=current_app.config['FTP_PASSWORD'])
+                except ftplib.error_perm:
+                    pass
+                else:
+                    for f in ftp_path.split('/'):
+                        try:
+                            ftp.mkd(f)
+                            ftp.cwd(f)
+                        except ftplib.error_perm:
+                            ftp.cwd(f)
+                    with open(os.path.join(upload_path, filename), 'rb') as upload_file:
+                        ftp.storbinary('STOR %s' % filename, upload_file)
+                    ftp.quit()
+
         f = Files(
             department_id=user_department.department_id,
             title=title,
@@ -149,7 +171,7 @@ def upload(parent_id=0):
 @admin_required
 def user_permissions():
     user_ids = request.form.getlist('user_ids[]')
-    file_id = request.form.get('fileid')
+    file_id = request.form.get('fileid', type=int)
 
     try:
         FilePermissions.query.filter(FilePermissions.file_id == file_id).delete()

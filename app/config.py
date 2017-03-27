@@ -19,6 +19,9 @@ class Config:
     MAIL_PASSWORD = r'Reset@123'
     MAIL_USE_TLS = False
     MAIL_USE_SSL = True
+    FTP_SERVER = 'aigbusiness.in'
+    FTP_USER = 'policies@aigbusiness.in'
+    FTP_PASSWORD = 'policy123'
 
 
 class DevelopmentConfig(Config):
