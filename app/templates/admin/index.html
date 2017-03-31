@@ -109,10 +109,12 @@
                                  id="{{d.id}}">
                                 <br>
                                  <ul class="list-group">
+                                      <li class="list-group-item active">
+                                          <input type="checkbox" class="all_checkbox_{{d.id}}"> Select All</li>
                                       {% for u in users[d.id] %}
                                         <li class="list-group-item">
                                             <input type="checkbox"
-                                                   class="permission_users" value="{{u.user_id}}">&nbsp;&nbsp;{{u.name}}</li>
+                                                   class="permission_users_{{d.id}}" value="{{u.user_id}}">&nbsp;&nbsp;{{u.name}}</li>
                                       {% endfor %}
                                  </ul>
                             </div>
@@ -176,22 +178,38 @@
                 $('[name=fileid]').val(e.relatedTarget.dataset.fileid);
                 file_permissions = permissions[e.relatedTarget.dataset.fileid];
                 if( typeof(file_permissions) !== 'undefined'){
-                     $('.permission_users').each(function(){
+                  {% for d in departments %}
+                     $('.permission_users_'+{{d.id}}).each(function(){
                          if( file_permissions.indexOf( parseInt($(this).val()) ) < 0 ){
                              $(this).prop('checked', false);
                          }else{
                             $(this).prop('checked', true);
                          }
                      });
+
+                     if( $('.permission_users_'+{{d.id}}).length == $('.permission_users_'+{{d.id}}+':checked').length ){
+                        $('.all_checkbox_'+{{d.id}}).prop('checked', true);
+
+                     }
+                  {% endfor %}
                 }else{
-                    $('.permission_users').each(function(){
+                   {% for d in departments %}
+                    $('.permission_users_'+{{d.id}}).each(function(){
                          $(this).prop('checked', false);
                     });
+                   {% endfor %}
                 }
             });
 
             $('#permissionModalBtn').click(function(e){
-                 user_ids = $('.permission_users:checked').map(function(){ return this.value }).get();
+
+                 user_ids = [];
+                 {% for d in departments %}
+                   user_ids.push($('.permission_users_{{d.id}}:checked').map(function(){ return this.value }).get());
+                 {% endfor %}
+
+                 var user_ids = [].concat.apply([], user_ids);
+
                  fileid = $('[name=fileid]').val();
                  var elm = $(this);
                  elm.text('Please wait.....');
@@ -236,6 +254,16 @@
             $('#updateFileModalBtn').click(function(e){
                  $('[name=changeFileFrm]').submit();
             });
+
+            {% for d in departments %}
+            $('.all_checkbox_'+{{d.id}}).click(function(){
+                    if( $(this).is(':checked') ){
+                        $('.permission_users_'+{{d.id}}).prop('checked', true);
+                    }else{
+                        $('.permission_users_'+{{d.id}}).prop('checked', false);
+                    }
+            });
+            {% endfor %}
 
         });
     </script>
