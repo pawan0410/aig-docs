@@ -106,7 +106,7 @@ def upload(parent_id=0):
         filename = secure_filename(file.filename) if file else ''
         file_size = 0
 
-        if not filename.endswith('.docx'):
+        if filename and not filename.endswith('.docx'):
             raise BadRequest('Only docx file is allowed.')
 
         upload_path = '%s/%s/%s' % (UPLOAD_PATH, user_department.department_id, parent_id)
@@ -214,7 +214,7 @@ def change_file():
 
     filename = secure_filename(file.filename) if file else ''
 
-    if not filename.endswith('.docx'):
+    if filename and not filename.endswith('.docx'):
         raise BadRequest('Only docx file is allowed.')
 
     file_data = Files.query.get(fileid)
@@ -224,17 +224,18 @@ def change_file():
 
     upload_path = '%s/%s/%s' % (UPLOAD_PATH, user_department.department_id, file_data.parent_id)
 
-    if file and file_data:
+    if file:
         os.makedirs(upload_path, exist_ok=True)
         file.save(
             os.path.join(upload_path, filename)
         )
         file_size = os.path.getsize(os.path.join(upload_path, filename)) // 1024
-
-        file_data.department_id = user_department.department_id
-        file_data.title = title
         file_data.file_name = filename
         file_data.file_size = file_size
+
+    if file_data:
+        file_data.department_id = user_department.department_id
+        file_data.title = title
         file_data.updated_by = current_user.id
 
         try:
