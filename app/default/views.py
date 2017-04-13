@@ -15,6 +15,7 @@ from flask_login import login_user
 from flask_login import logout_user
 from flask_login import current_user
 from flask_mail import Message
+from flask import current_app
 
 from app.extensions import login_manager
 from app.extensions import db
@@ -44,6 +45,8 @@ def index():
         else:
             view_link = '/main'
 
+        current_app.logger.info("Next Link %s" % view_link)
+        
         user = User.query.filter_by(
             email=email,
             password=hashlib.md5(password.encode()).hexdigest()
