@@ -46,7 +46,7 @@ def index():
             view_link = '/main'
 
         current_app.logger.info("Next Link %s" % view_link)
-        
+
         user = User.query.filter_by(
             email=email,
             password=hashlib.md5(password.encode()).hexdigest()
@@ -126,7 +126,7 @@ def reset_password():
         password = request.form['new_password']
 
         user = User.query.\
-            filter(User.email == email, User.password == hashlib.md5(hash_code.encode()).hexdigest()).\
+            filter(User.email == email, User.password == hash_code).\
             first()
 
         if user:
