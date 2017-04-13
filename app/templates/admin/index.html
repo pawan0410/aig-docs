@@ -40,6 +40,10 @@
             </td>
             <td class="clearfix">{{row.file_name}}
                 <div class="pull-right">
+
+                    <span class="glyphicon glyphicon-share" data-container="body" data-toggle="popover" data-placement="bottom"
+                          data-content="http://{{request.host}}/main/view_link/{{row.id}}" title="Share link"></span>
+                    &nbsp;&nbsp;
                     <span class="glyphicon glyphicon-pencil"
                      data-tooltip="tooltip"
                           data-placement="bottom"
@@ -172,6 +176,7 @@
     <script>
         $(document).ready(function(e){
             $('[data-tooltip="tooltip"]').tooltip();
+            $('[data-toggle="popover"]').popover();
             var permissions = {{permissions|tojson|safe}};
 
             $('#permissionModal').on('show.bs.modal', function (e) {

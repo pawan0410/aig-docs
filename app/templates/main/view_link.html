@@ -1,54 +1,43 @@
-<!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>AIG Business Policies - Admin </title>
+    <title>AIG Business Policies </title>
     <link rel="icon" href="/static/images/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="/static/bootstrap/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="/static/css/theme.min.css">
     <script src="/static/jquery/dist/jquery.min.js"></script>
     <script src="/static/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="/static/scrollup/dist/jquery.scrollUp.min.js"></script>
+    <script>
+        $(function () {
+          $.scrollUp({
+            scrollName: 'scrollUp', // Element ID
+            topDistance: '300', // Distance from top before showing element (px)
+            topSpeed: 300, // Speed back to top (ms)
+            animation: 'fade', // Fade, slide, none
+            animationInSpeed: 200, // Animation in speed (ms)
+            animationOutSpeed: 200, // Animation out speed (ms)
+            activeOverlay: false, // Set CSS color to display scrollUp active point, e.g '#00FFFF'
+            scrollImg: true
+          });
+        });
+    </script>
     <style>
-        div.pull-right span.glyphicon{
-            cursor: pointer;
+    #scrollUp {
+      bottom: 20px;
+      right: 20px;
+      width: 38px; /* Width of image */
+      height: 38px; /* Height of image */
+      background: url(/static/images/top.png) no-repeat;
+    }
+    @media (min-width: 768px){
+        .navbar {
+            border-radius: 0px;
         }
-        		@media (min-width: 768px){
-			.navbar {
-				border-radius: 0px;
-			}
-		}
-		.breadcrumb>li+li:before{
-			content: "\25BA";
-		}
-		.page-header{
-		    margin: -24px 0 20px;
-		}
-		@media (min-width: 1200px){
-		    .col-lg-3 {
-                width: 20%;
-            }
-            .col-lg-9 {
-               width: 80%;
-            }
-		}
-		@media (min-width: 768px){
-		    .col-sm-offset-1 {
-                margin-left: 1.333333%;
-            }
-		}
-		ul li{
-		    list-style-type: none;
-		}
-
-		span.glyphicon.glyphicon-resize-full, span.glyphicon.glyphicon-resize-small{
-		    cursor: pointer;
-		}
-		.nav-tabs > li{
-		    padding: 0px 6px;
-		}
-		.navbar-inverse {
+    }
+    .navbar-inverse {
             background-color: #f9f9f9;
         }
 
@@ -58,11 +47,7 @@
         .navbar-inverse .navbar-nav>li>a:hover {
             color: #81c7fd;
         }
-
-
     </style>
-    {% block extra_js %}
-    {% endblock %}
 </head>
 <body>
 <nav class="navbar navbar-inverse">
@@ -83,11 +68,14 @@
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse clearfix" id="bs-example-navbar-collapse-1">
             <ul class="nav navbar-nav navbar-right clearfix">
+                {% if current_user.is_admin %}
+                    <li><a href="/admin">Visit admin panel</a></li>
+                {% endif %}
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
                        aria-expanded="false">
                         <span class="glyphicon glyphicon-user"></span>&nbsp;
-                        {{current_user.name}} ({{user_department_name}})<span class="caret"></span></a>
+                        {{current_user.name}} ( {{user_department_name}} )<span class="caret"></span></a>
                     <ul class="dropdown-menu">
                         <li><a href="/main/settings">Settings</a></li>
                         <li role="separator" class="divider"></li>
@@ -100,17 +88,14 @@
 </nav>
 
 <div class="container container-fluid">
-    <div class="row">
-        <div class="col-sm-12">
-            {% block content %}
-            {% endblock %}
-        </div>
+    <div class="page-header">
+        <h2>{{title}}</h2>
     </div>
-<footer style="position: fixed; bottom: 0;">
-    <p><em>Copyright &copy; 2017. Version 1.0 </em></p>
-</footer>
+    <div class="well">
+        {% autoescape off %}
+            {{ content }}
+        {% endautoescape%}
+    </div>
 </div>
-
-
 </body>
 </html>
