@@ -32,9 +32,17 @@ def load_user(id):
 def index():
     error = ''
     success = ''
+    _next = request.args.get('next') if request.args.get('next') else ''
+
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
+        next_link = request.form.get('next', type=str)
+
+        if next_link:
+            view_link = '/main/view_link/%s' % next_link
+        else:
+            view_link = '/main'
 
         user = User.query.filter_by(
             email=email,
@@ -46,16 +54,20 @@ def index():
             login_user(user)
             db.session.commit()
             if user.admin():
-                return render_template('default/admin_welcome.html')
+                if next_link:
+                    return redirect(view_link)
+                else:
+                    return render_template('default/admin_welcome.html')
             else:
-                return redirect('/main')
+                return redirect(view_link)
         else:
             error = 'Invalid login..'
 
     return render_template(
         'default/index.html',
         error=error,
-        success=success
+        success=success,
+        next=_next
     )
 
 
@@ -111,7 +123,7 @@ def reset_password():
         password = request.form['new_password']
 
         user = User.query.\
-            filter(User.email == email, User.password == hashlib.md5(password.encode()).hexdigest()).\
+            filter(User.email == email, User.password == hashlib.md5(hash_code.encode()).hexdigest()).\
             first()
 
         if user:

@@ -1,0 +1,101 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AIG Business Policies </title>
+    <link rel="icon" href="/static/images/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="/static/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/theme.min.css">
+    <script src="/static/jquery/dist/jquery.min.js"></script>
+    <script src="/static/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="/static/scrollup/dist/jquery.scrollUp.min.js"></script>
+    <script>
+        $(function () {
+          $.scrollUp({
+            scrollName: 'scrollUp', // Element ID
+            topDistance: '300', // Distance from top before showing element (px)
+            topSpeed: 300, // Speed back to top (ms)
+            animation: 'fade', // Fade, slide, none
+            animationInSpeed: 200, // Animation in speed (ms)
+            animationOutSpeed: 200, // Animation out speed (ms)
+            activeOverlay: false, // Set CSS color to display scrollUp active point, e.g '#00FFFF'
+            scrollImg: true
+          });
+        });
+    </script>
+    <style>
+    #scrollUp {
+      bottom: 20px;
+      right: 20px;
+      width: 38px; /* Width of image */
+      height: 38px; /* Height of image */
+      background: url(/static/images/top.png) no-repeat;
+    }
+    @media (min-width: 768px){
+        .navbar {
+            border-radius: 0px;
+        }
+    }
+    .navbar-inverse {
+            background-color: #f9f9f9;
+        }
+
+        .navbar-inverse .navbar-nav>li>a {
+            color: #5f5f5f;
+        }
+        .navbar-inverse .navbar-nav>li>a:hover {
+            color: #81c7fd;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-inverse">
+    <div class="container">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header clearfix">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                    data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/main">
+                <img src="/static/images/logo.png" width="160" height="56" align="top" style="margin-top:-16px;">
+            </a>
+        </div>
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse clearfix" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav navbar-right clearfix">
+                {% if current_user.is_admin %}
+                    <li><a href="/admin">Visit admin panel</a></li>
+                {% endif %}
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+                       aria-expanded="false">
+                        <span class="glyphicon glyphicon-user"></span>&nbsp;
+                        {{current_user.name}} ( {{user_department_name}} )<span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="/main/settings">Settings</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="/logout">Logout</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div><!-- /.navbar-collapse -->
+    </div><!-- /.container-fluid -->
+</nav>
+
+<div class="container container-fluid">
+    <div class="page-header">
+        <h2>{{title}}</h2>
+    </div>
+    <div class="well">
+        {% autoescape off %}
+            {{ content }}
+        {% endautoescape%}
+    </div>
+</div>
+</body>
+</html>

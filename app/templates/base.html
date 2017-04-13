@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="/static/css/theme.min.css">
     <script src="/static/jquery/dist/jquery.min.js"></script>
     <script src="/static/bootstrap/dist/js/bootstrap.min.js"></script>
-    <script src="/static/scrollup-master/dist/jquery.scrollUp.min.js"></script>
+    <script src="/static/scrollup/dist/jquery.scrollUp.min.js"></script>
     <script>
         $(function () {
           $.scrollUp({
@@ -27,28 +27,27 @@
     </script>
     <style>
     #scrollUp {
-  bottom: 20px;
-  right: 20px;
-  width: 38px; /* Width of image */
-  height: 38px; /* Height of image */
-  background: url(/static/images/top.png) no-repeat;
-}
-
-    body{
-      font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
-      //font-family: "sc_segoe-ui_normal,'Segoe UI',Segoe,'Segoe WP',Tahoma,Verdana,Arial,sans-serif";
-
+      bottom: 20px;
+      right: 20px;
+      width: 38px; /* Width of image */
+      height: 38px; /* Height of image */
+      background: url(/static/images/top.png) no-repeat;
     }
+    body{
+        /*background: url('/static/images/bg.png') no-repeat top left;
+        background-size: 100%;*/
+    }
+
     .well-bg{
          background: url('/static/images/bg1.jpg') no-repeat top left;
-      background-size: 100%;
+         background-size: 100%;
     }
 
-		@media (min-width: 768px){
-			.navbar {
-				border-radius: 0px;
-			}
-		}
+    @media (min-width: 768px){
+        .navbar {
+            border-radius: 0px;
+        }
+    }
 		.breadcrumb>li+li:before{
 			content: "\25BA";
 		}
@@ -76,7 +75,7 @@
 		    cursor: pointer;
 		}
 		.nav-tabs > li{
-		    padding: 10px 28px;
+		    padding: 4px 37px;
 		}
 		.navbar-inverse {
             background-color: #f9f9f9;
@@ -96,7 +95,12 @@
 
         }
         #the_content{
-        border : none;
+            border : none;
+        }
+        @media (min-width: 992px){
+            .modal-lg {
+                width: 90%;
+            }
         }
 
     </style>
@@ -171,7 +175,7 @@
                                 {% for row in files_by_department[d.id] %}
                                 <li role="presentation">
                                     <a href="#" data-id="{{row.id}}" data-title="{{row.title}}"
-                                       class="menu_links" data-nav="{{row.title}}" data-department="{{d.id}}">
+                                       class="menu_links" data-nav="{{row.title}}_{{row.id}}_{{d.id}}" data-department="{{d.id}}">
                                         <span class="glyphicon glyphicon-file"></span> &nbsp;{{row.title}}</a>
                                 </li>
                                 {% endfor %}
@@ -235,19 +239,37 @@
     </div>
   </div>
 </div>
-
+<div class="well">
+        <em>Copyright &copy; 2017. Version 1.0</em>
+</div>
 </body>
 <script>
- var winHeight = screen.availHeight;
- var frame = document.getElementById('the_content')
- frame.style.height = winHeight+"px";
+
+ function setContentHeightDefault(){
+    var winHeight = screen.availHeight;
+    var frame = document.querySelectorAll('.the_content')
+    for(i=0; i < frame.length; i++){
+        frame[i].style.height = winHeight+"px";
+    }
+ }
+
+ setContentHeightDefault();
+
+ function setContentHeight(department_id){
+    var winHeight = screen.availHeight;
+    var frame = document.querySelector('#tab_'+department_id + ' #the_content')
+    frame.style.height = winHeight+"px";
+ }
 
 
  function loadMenu(parent_id, instance){
      $('.tools').hide();
+
      var department_id = instance.data('department');
      $('#the_content').contents().find('body').empty();
      $('.well').removeClass('well-bg');
+
+     setContentHeight(department_id);
 
      document.querySelector('#tab_'+department_id + ' #the_content').contentWindow.document.write('<span id="loader">&nbsp;&nbsp;Loading.... &nbsp; <img  src="/static/images/arrow-loader.gif"></span>');
      $.ajax({
@@ -272,17 +294,14 @@
                 var breadcrumb = '';
                 $.each(links, function(i, v){
                        var x = v.split('_');
-                       console.log(x);
-                       //var nav =
                        breadcrumb += '<li class="'+link_class+' blinks">\
-                       <a class="menu_links" data-nav="'+instance.data('nav')+'" data-department="'+x[2]+'" href="#" data-id="'+x[1]+'" data-title="'+x[0]+'">'+x[0]+'</a></li>';
+                       <a target="_blank" href="/main/view_link/'+x[1]+'" data-nav="'+instance.data('nav')+'" data-department="'+x[2]+'" href="#" data-id="'+x[1]+'" data-title="'+x[0]+'">'+x[0]+'</a></li>';
                 });
                 $('#tab_'+department_id+' .breadcrumb').append(breadcrumb);
             }
 
-            //$('#tab_'+department_id + ' #the_content').html(response.content);
-            $('#the_content').contents().find('#loader').remove();
-            $('#the_content').contents().find('body').empty()
+            $('#tab_'+department_id + ' #the_content').contents().find('#loader').remove();
+            $('#tab_'+department_id + ' #the_content').contents().find('body').empty()
             document.querySelector('#tab_'+department_id + ' #the_content').contentWindow.document.write(response.content)
 
             $('#tab_'+department_id + ' span.glyphicon.glyphicon-eye-open').attr('data-link', response.file_url);
@@ -327,14 +346,14 @@
 		$('#feedbackModalLabel').text('Send Feedback for '+title);
 
 		$('#feedbackModal').find('button[type=submit]').click(function(e){
-		         var btn  = $(this);
-		         $.ajax({
-		            url: '/main/feedback',
-		            type: 'POST',
-		            data: {fileid: fileid, message: $('#feedbackModal').find('textarea[name=message]').val() }
-		         }).done(function(response){
-		            //
-		         });
+             var btn  = $(this);
+             $.ajax({
+                url: '/main/feedback',
+                type: 'POST',
+                data: {fileid: fileid, message: $('#feedbackModal').find('textarea[name=message]').val() }
+             }).done(function(response){
+                //
+             });
 		});
  });
 

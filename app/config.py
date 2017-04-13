@@ -30,7 +30,7 @@ class DevelopmentConfig(Config):
     """
 
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = 'mysql://root:root@127.0.0.1/aig_docs'
+    SQLALCHEMY_DATABASE_URI = 'mysql://root@127.0.0.1/aig_docs'
 
 
 class ProductionConfig(Config):
@@ -39,7 +39,7 @@ class ProductionConfig(Config):
     """
 
     DEBUG = False
-    SQLALCHEMY_DATABASE_URI = 'mysql://root:maria@aig2016@127.0.0.1/aig_docs'
+    SQLALCHEMY_DATABASE_URI = 'mysql://root:maria@aig2016@192.168.8.37/aig_docs'
 
 
 app_config = {

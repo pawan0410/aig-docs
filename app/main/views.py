@@ -187,3 +187,43 @@ def feedback():
 
     return ''
 
+
+@main_module.route('/view_link/<int:id>')
+def view_link(id=None):
+    departments = [{'id': row.id, 'name': row.name} for row in Department.query.all()]
+
+    departments_dict = {d['id']: d['name'] for d in departments}
+
+    user_department = UserDepartment.query. \
+        filter(UserDepartment.user_id == current_user.id).first()
+
+    user_department_name = departments_dict[user_department.department_id]
+
+    permissions = defaultdict(list)
+    for f in FilePermissions.query.all():
+        permissions[f.file_id].append(f.user_id)
+
+    file_permission = permissions[id]
+
+    if (user_department_name.lower() != 'management') and (file_permission and current_user.id not in file_permission):
+            raise Forbidden()
+
+    file_content = Files.query.filter(Files.id == id).first()
+
+    file_path = '%s/%s/%s/%s' % (UPLOAD_PATH,
+                                 file_content.department_id,
+                                 file_content.parent_id, file_content.file_name)
+
+    if os.path.isfile(file_path):
+        with open(file_path, 'rb') as doc_file:
+            result = mammoth.convert_to_html(doc_file)
+            html = result.value
+    else:
+        html = 'Nothing to show here.'
+
+    return render_template(
+        'main/view_link.html',
+        user_department_name=user_department_name,
+        content=html,
+        title=file_content.title
+    )

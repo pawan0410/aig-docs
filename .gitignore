@@ -5,9 +5,12 @@ __pycache__/
 
 # C extensions
 *.so
-
+.DS_Store/
+.DS_Store
+DS_Store
 migrations/
 uploads/
+static/uploads/
 
 # Distribution / packaging
 .Python
@@ -92,3 +95,4 @@ ENV/
 # Rope project settings
 .ropeproject
 .idea/
+bower.json
