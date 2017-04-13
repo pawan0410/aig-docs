@@ -40,7 +40,7 @@ def index():
         next_link = request.form.get('next', type=str)
 
         if next_link:
-            view_link = '/main/view_link/%s' % next_link
+            view_link = '%s' % next_link
         else:
             view_link = '/main'
 
